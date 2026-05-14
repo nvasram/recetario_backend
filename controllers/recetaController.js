@@ -1,17 +1,17 @@
+const mongoose = require("mongoose");
 const Receta = require("../models/Receta");
- 
-// ── GET /api/recetas ──────────────────────────────────────────
-// Obtiene todas las recetas. Permite filtrar por categoría:
-// GET /api/recetas?categoria=desayuno
+
+// GET /api/recetas
 const getRecetas = async (req, res, next) => {
   try {
     const filtro = {};
+
     if (req.query.categoria) {
       filtro.categoria = req.query.categoria;
     }
- 
+
     const recetas = await Receta.find(filtro).sort({ createdAt: -1 });
- 
+
     res.status(200).json({
       success: true,
       total: recetas.length,
@@ -21,32 +21,42 @@ const getRecetas = async (req, res, next) => {
     next(error);
   }
 };
- 
-// ── GET /api/recetas/:id ──────────────────────────────────────
-// Obtiene una receta por su ID
+
+// GET /api/recetas/:id
 const getRecetaById = async (req, res, next) => {
   try {
-    const receta = await Receta.findById(req.params.id);
- 
+    const id = req.params.id.trim();
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID no válido",
+      });
+    }
+
+    const receta = await Receta.findById(id);
+
     if (!receta) {
       return res.status(404).json({
         success: false,
         error: "Receta no encontrada",
       });
     }
- 
-    res.status(200).json({ success: true, data: receta });
+
+    res.status(200).json({
+      success: true,
+      data: receta,
+    });
   } catch (error) {
     next(error);
   }
 };
- 
-// ── POST /api/recetas ─────────────────────────────────────────
-// Crea una nueva receta
+
+// POST /api/recetas
 const createReceta = async (req, res, next) => {
   try {
     const receta = await Receta.create(req.body);
- 
+
     res.status(201).json({
       success: true,
       message: "Receta creada correctamente",
@@ -56,23 +66,31 @@ const createReceta = async (req, res, next) => {
     next(error);
   }
 };
- 
-// ── PUT /api/recetas/:id ──────────────────────────────────────
-// Actualiza una receta existente por su ID
+
+// PUT /api/recetas/:id
 const updateReceta = async (req, res, next) => {
   try {
-    const receta = await Receta.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,           // devuelve el documento actualizado
-      runValidators: true, // ejecuta las validaciones del schema
+    const id = req.params.id.trim();
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID no válido",
+      });
+    }
+
+    const receta = await Receta.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
     });
- 
+
     if (!receta) {
       return res.status(404).json({
         success: false,
         error: "Receta no encontrada",
       });
     }
- 
+
     res.status(200).json({
       success: true,
       message: "Receta actualizada correctamente",
@@ -82,20 +100,28 @@ const updateReceta = async (req, res, next) => {
     next(error);
   }
 };
- 
 
-// Elimina una receta por su ID
+// DELETE /api/recetas/:id
 const deleteReceta = async (req, res, next) => {
   try {
-    const receta = await Receta.findByIdAndDelete(req.params.id);
- 
+    const id = req.params.id.trim();
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID no válido",
+      });
+    }
+
+    const receta = await Receta.findByIdAndDelete(id);
+
     if (!receta) {
       return res.status(404).json({
         success: false,
         error: "Receta no encontrada",
       });
     }
- 
+
     res.status(200).json({
       success: true,
       message: "Receta eliminada correctamente",
@@ -105,7 +131,7 @@ const deleteReceta = async (req, res, next) => {
     next(error);
   }
 };
- 
+
 module.exports = {
   getRecetas,
   getRecetaById,
