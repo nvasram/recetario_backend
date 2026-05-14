@@ -1,0 +1,115 @@
+const Receta = require("../models/Receta");
+ 
+// ── GET /api/recetas ──────────────────────────────────────────
+// Obtiene todas las recetas. Permite filtrar por categoría:
+// GET /api/recetas?categoria=desayuno
+const getRecetas = async (req, res, next) => {
+  try {
+    const filtro = {};
+    if (req.query.categoria) {
+      filtro.categoria = req.query.categoria;
+    }
+ 
+    const recetas = await Receta.find(filtro).sort({ createdAt: -1 });
+ 
+    res.status(200).json({
+      success: true,
+      total: recetas.length,
+      data: recetas,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+ 
+// ── GET /api/recetas/:id ──────────────────────────────────────
+// Obtiene una receta por su ID
+const getRecetaById = async (req, res, next) => {
+  try {
+    const receta = await Receta.findById(req.params.id);
+ 
+    if (!receta) {
+      return res.status(404).json({
+        success: false,
+        error: "Receta no encontrada",
+      });
+    }
+ 
+    res.status(200).json({ success: true, data: receta });
+  } catch (error) {
+    next(error);
+  }
+};
+ 
+// ── POST /api/recetas ─────────────────────────────────────────
+// Crea una nueva receta
+const createReceta = async (req, res, next) => {
+  try {
+    const receta = await Receta.create(req.body);
+ 
+    res.status(201).json({
+      success: true,
+      message: "Receta creada correctamente",
+      data: receta,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+ 
+// ── PUT /api/recetas/:id ──────────────────────────────────────
+// Actualiza una receta existente por su ID
+const updateReceta = async (req, res, next) => {
+  try {
+    const receta = await Receta.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,           // devuelve el documento actualizado
+      runValidators: true, // ejecuta las validaciones del schema
+    });
+ 
+    if (!receta) {
+      return res.status(404).json({
+        success: false,
+        error: "Receta no encontrada",
+      });
+    }
+ 
+    res.status(200).json({
+      success: true,
+      message: "Receta actualizada correctamente",
+      data: receta,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+ 
+
+// Elimina una receta por su ID
+const deleteReceta = async (req, res, next) => {
+  try {
+    const receta = await Receta.findByIdAndDelete(req.params.id);
+ 
+    if (!receta) {
+      return res.status(404).json({
+        success: false,
+        error: "Receta no encontrada",
+      });
+    }
+ 
+    res.status(200).json({
+      success: true,
+      message: "Receta eliminada correctamente",
+      data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+ 
+module.exports = {
+  getRecetas,
+  getRecetaById,
+  createReceta,
+  updateReceta,
+  deleteReceta,
+};
