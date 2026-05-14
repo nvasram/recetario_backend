@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const {
   getRecetas,
   getRecetaById,
@@ -7,13 +8,12 @@ const {
   updateReceta,
   deleteReceta,
 } = require("../controllers/recetaController");
- 
-router.get("/", getRecetas)
-router.post("/", createReceta)
-router.delete("/:id")
-router.get(":/id",getRecetaById)
-router.put(":/id", updateReceta)
-router.delete(":/id",deleteReceta);
- 
+
+router.get("/", getRecetas);
+router.post("/", createReceta);
+
+router.get("/:id", getRecetaById);
+router.put("/:id", updateReceta);
+router.delete("/:id", deleteReceta);
+
 module.exports = router;
- 
